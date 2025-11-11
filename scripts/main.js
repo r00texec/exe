@@ -1,233 +1,355 @@
 // ============================================
-// Мобильное меню
+// AvtoWay - Главный скрипт
 // ============================================
 
-const hamburger = document.getElementById('hamburger');
-const navLinks = document.querySelector('.nav-links');
-
-hamburger.addEventListener('click', () => {
-    navLinks.classList.toggle('active');
-    
-    // Анимация иконки меню
-    const spans = hamburger.querySelectorAll('span');
-    spans.forEach(span => span.style.transition = 'all 0.3s ease');
-    
-    if (navLinks.classList.contains('active')) {
-        spans[0].style.transform = 'rotate(45deg) translate(10px, 10px)';
-        spans[1].style.opacity = '0';
-        spans[2].style.transform = 'rotate(-45deg) translate(7px, -7px)';
-    } else {
-        spans[0].style.transform = 'none';
-        spans[1].style.opacity = '1';
-        spans[2].style.transform = 'none';
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    initHamburger();
+    initFormValidation();
+    initSmoothScroll();
+    initScrollAnimations();
+    initFAQ();
+    initStats();
 });
 
-// Закрытие меню при клике на ссылку
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
+// ============================================
+// Hamburger Menu
+// ============================================
+
+function initHamburger() {
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (!hamburger || !navLinks) return;
+
+    hamburger.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        
         const spans = hamburger.querySelectorAll('span');
-        spans.forEach(span => span.style.transform = 'none');
-        spans[1].style.opacity = '1';
+        spans.forEach(span => span.style.transition = 'all 0.3s ease');
+        
+        if (navLinks.classList.contains('active')) {
+            spans[0].style.transform = 'rotate(45deg) translate(10px, 10px)';
+            spans[1].style.opacity = '0';
+            spans[2].style.transform = 'rotate(-45deg) translate(7px, -7px)';
+        } else {
+            spans[0].style.transform = 'none';
+            spans[1].style.opacity = '1';
+            spans[2].style.transform = 'none';
+        }
     });
-});
 
-// ============================================
-// Обработка формы контактов
-// ============================================
+    navLinks.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            navLinks.classList.remove('active');
+            const spans = hamburger.querySelectorAll('span');
+            spans[0].style.transform = 'none';
+            spans[1].style.opacity = '1';
+            spans[2].style.transform = 'none';
+        });
+    });
 
-const contactForm = document.getElementById('contactForm');
-
-contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    // Получение данных формы
-    const formData = new FormData(contactForm);
-    const data = {
-        name: contactForm.querySelector('input[type="text"]').value,
-        email: contactForm.querySelector('input[type="email"]').value,
-        phone: contactForm.querySelector('input[type="tel"]').value,
-        message: contactForm.querySelector('textarea').value
-    };
-    
-    // Валидация
-    if (!data.name || !data.email || !data.phone || !data.message) {
-        showNotification('Пожалуйста, заполните все поля', 'error');
-        return;
-    }
-    
-    // Проверка email
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(data.email)) {
-        showNotification('Пожалуйста, введите корректный email', 'error');
-        return;
-    }
-    
-    // Проверка телефона
-    const phonePattern = /^[\d\s\-\+\(\)]+$/;
-    if (!phonePattern.test(data.phone)) {
-        showNotification('Пожалуйста, введите корректный номер телефона', 'error');
-        return;
-    }
-    
-    // В реальном приложении данные отправляются на сервер
-    console.log('Данные формы:', data);
-    
-    // Очистка формы
-    contactForm.reset();
-    
-    // Показ сообщения об успехе
-    showNotification('Спасибо! Ваше сообщение отправлено. Мы скоро с вами свяжемся!', 'success');
-});
-
-// ============================================
-// Функция для показа уведомлений
-// ============================================
-
-function showNotification(message, type = 'info') {
-    // Создание элемента уведомления
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        border-radius: 5px;
-        color: white;
-        font-weight: 500;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        animation: slideIn 0.3s ease;
-        z-index: 9999;
-        max-width: 400px;
-    `;
-    
-    // Выбор цвета в зависимости от типа
-    if (type === 'success') {
-        notification.style.backgroundColor = '#10b981';
-    } else if (type === 'error') {
-        notification.style.backgroundColor = '#ef4444';
-    } else {
-        notification.style.backgroundColor = '#3b82f6';
-    }
-    
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    // Удаление уведомления через 4 секунды
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
-    }, 4000);
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.navbar')) {
+            navLinks.classList.remove('active');
+            const spans = hamburger.querySelectorAll('span');
+            spans[0].style.transform = 'none';
+            spans[1].style.opacity = '1';
+            spans[2].style.transform = 'none';
+        }
+    });
 }
 
 // ============================================
-// Плавная прокрутка при клике на якорь
+// Form Validation
 // ============================================
 
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        const href = this.getAttribute('href');
-        if (href === '#') return;
-        
+function initFormValidation() {
+    const form = document.querySelector('.contact-form');
+    if (!form) return;
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const target = document.querySelector(href);
+
+        const name = form.querySelector('input[placeholder="Ваше имя"]');
+        const email = form.querySelector('input[placeholder*="Email"]');
+        const message = form.querySelector('textarea[placeholder*="Сообщение"]');
+
+        if (!name.value.trim()) {
+            showError(name, 'Пожалуйста, введите имя');
+            return;
+        }
+
+        if (!email.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            showError(email, 'Пожалуйста, введите корректный email');
+            return;
+        }
+
+        if (!message.value.trim()) {
+            showError(message, 'Пожалуйста, введите сообщение');
+            return;
+        }
+
+        clearErrors(form);
+        showSuccess(submitBtn);
+        form.reset();
+    });
+
+    form.querySelectorAll('input, textarea').forEach(field => {
+        field.addEventListener('input', () => {
+            clearFieldError(field);
+        });
+    });
+}
+
+function showError(field, message) {
+    clearFieldError(field);
+    
+    const wrapper = field.parentElement;
+    const error = document.createElement('div');
+    error.className = 'error-message';
+    error.style.cssText = `
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+        animation: slideInLeft 0.3s ease;
+    `;
+    error.textContent = message;
+    
+    wrapper.appendChild(error);
+    field.style.borderColor = '#e74c3c';
+}
+
+function clearFieldError(field) {
+    const error = field.parentElement.querySelector('.error-message');
+    if (error) error.remove();
+    field.style.borderColor = '';
+}
+
+function clearErrors(form) {
+    form.querySelectorAll('.error-message').forEach(err => err.remove());
+    form.querySelectorAll('input, textarea').forEach(field => {
+        field.style.borderColor = '';
+    });
+}
+
+function showSuccess(btn) {
+    const originalText = btn.textContent;
+    btn.textContent = '✓ Спасибо! Сообщение отправлено';
+    btn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+    
+    setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = '';
+    }, 3000);
+}
+
+// ============================================
+// Smooth Scroll
+// ============================================
+
+function initSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (href === '#') return;
+
+            e.preventDefault();
+            const element = document.querySelector(href);
+            
+            if (element) {
+                const offsetTop = element.offsetTop - 80;
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+}
+
+// ============================================
+// Scroll Animations
+// ============================================
+
+function initScrollAnimations() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.service-card, .about-text, .contact-item, .stat-item, .advantage-item, .faq-item').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+}
+
+// ============================================
+// FAQ Аккордион
+// ============================================
+
+function initFAQ() {
+    const faqItems = document.querySelectorAll('.faq-item');
+
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
         
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+        if (question) {
+            question.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                
+                faqItems.forEach(otherItem => {
+                    otherItem.classList.remove('active');
+                });
+                
+                if (!isActive) {
+                    item.classList.add('active');
+                }
             });
         }
     });
-});
+}
 
 // ============================================
-// Анимация элементов при прокрутке
+// Счётчик статистики
 // ============================================
 
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -100px 0px'
-};
+function initStats() {
+    const statNumbers = document.querySelectorAll('.stat-number');
+    let hasAnimated = false;
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
-            observer.unobserve(entry.target);
-        }
-    });
-}, observerOptions);
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !hasAnimated) {
+                hasAnimated = true;
+                statNumbers.forEach(el => {
+                    animateCounter(el);
+                });
+            }
+        });
+    }, { threshold: 0.5 });
 
-// Добавление класса для элементов, которые должны анимироваться
-document.querySelectorAll('.service-card, .contact-item').forEach(el => {
-    el.style.opacity = '0';
-    observer.observe(el);
-});
-
-// ============================================
-// Добавление CSS анимации
-// ============================================
-
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+    const statsSection = document.querySelector('.stats');
+    if (statsSection) {
+        observer.observe(statsSection);
     }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
+}
+
+function animateCounter(element) {
+    const target = element.textContent;
+    const number = parseInt(target.replace(/[^0-9]/g, ''));
+    const duration = 2000;
+    const startTime = Date.now();
+
+    const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const current = Math.floor(number * progress);
+        
+        element.textContent = current.toLocaleString('ru-RU') + (target.includes('+') ? '+' : target.match(/[^0-9]+$/) || '');
+        
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            element.textContent = target;
         }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-    }
-    
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-`;
-document.head.appendChild(style);
+    };
+
+    animate();
+}
 
 // ============================================
-// Скрытие меню при прокрутке
+// Active link highlighting
 // ============================================
-
-let lastScrollTop = 0;
-const navbar = document.querySelector('.navbar');
 
 window.addEventListener('scroll', () => {
-    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    
-    if (scrollTop > lastScrollTop) {
-        // Прокрутка вниз
-        navbar.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
-    } else {
-        // Прокрутка вверх
-        navbar.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-    }
-    
-    lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    let current = '';
+    const sections = document.querySelectorAll('section, header');
+
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (scrollY >= sectionTop - 200) {
+            current = section.getAttribute('id');
+        }
+    });
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').slice(1) === current) {
+            link.classList.add('active');
+        }
+    });
 });
 
-console.log('AvtoWayUz - Профессиональный автосервис. Скрипт загружен успешно!');
+// ============================================
+// Dock Navigation
+// ============================================
+
+const dockItems = document.querySelectorAll('.dock-item');
+
+dockItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Эффект клика
+        item.style.transform = 'scale(0.85) translateY(-15px)';
+        setTimeout(() => {
+            item.style.transform = '';
+        }, 120);
+        
+        // Переходим на нужную секцию
+        const href = item.getAttribute('href');
+        if (href === 'https://t.me/autoway') {
+            window.open(href, '_blank');
+        } else if (href.startsWith('#')) {
+            const target = document.querySelector(href);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                highlightDockItem(href);
+            }
+        }
+    });
+});
+
+function highlightDockItem(sectionId) {
+    dockItems.forEach(item => {
+        item.style.opacity = '0.7';
+    });
+    
+    const activeItem = document.querySelector(`.dock-item[href="${sectionId}"]`);
+    if (activeItem) {
+        activeItem.style.opacity = '1';
+    }
+}
+
+// Обновляем dock при скролле
+window.addEventListener('scroll', () => {
+    let current = '';
+    const sections = document.querySelectorAll('[id]');
+    
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (window.pageYOffset >= sectionTop - 300) {
+            current = `#${section.getAttribute('id')}`;
+        }
+    });
+    
+    if (current) {
+        highlightDockItem(current);
+    }
+}, { passive: true });
+
+
+console.log('✓ AvtoWay - приложение загружено успешно!');
